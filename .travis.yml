@@ -1,30 +1,32 @@
+# 配置语言及相应版本
 language: node_js
-node_js: stable
-cache:
-  directories:
-  - node_modules
-before_install:
-- openssl aes-256-cbc -K $encrypted_7207f3614e05_key -iv $encrypted_7207f3614e05_iv
-  -in id_rsa.enc -out .travis/id_rsa -d
-- npm install hexo-cli -g
-install:
-- npm install
-- npm install hexo-deployer-git --save
-script:
-- hexo clean
-- hexo g
-after_script:
-- git clone ${GH_REF} hexo-public
-- cp -rf public/* hexo-public/
-- cd hexo-public
-- git config user.name "shenbo"
-- git config user.email "shenbo@hotmail.com"
-- git add .
-- git commit -am "Travis CI Auto Builder..."
-- git push origin master
+
+node_js:
+  - "4"
+# 项目所在分支
 branches:
   only:
   - master
-env:
-  global:
-  - GH_REF: https://shenbo:${github_token}@github.com/shenbo/shenbo.github.io.git
+# 配置环境
+before_install:
+# 替换为刚才生成的解密信息
+- openssl aes-256-cbc -K $encrypted_7207f3614e05_key -iv $encrypted_7207f3614e05_iv
+  -in id_rsa.enc -out .travis/id_rsa -d
+# 改变文件权限
+- chmod 600 ~/.ssh/id_rsa 
+# 配置 ssh
+- eval $(ssh-agent)
+- ssh-add ~/.ssh/id_rsa
+- cp .travis/ssh_config ~/.ssh/config
+# 配置 git 替换为自己的信息
+- git config --global user.name 'XuGuangSheng'
+- git config --global user.email '982489343@qq.com'
+
+# 安装依赖
+install:
+- npm install hexo-cli -g
+- npm install
+
+# 部署的命令
+script:
+- npm run deploy  # hexo clean && hexo g -d
