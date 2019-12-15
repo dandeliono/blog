@@ -1,0 +1,34 @@
+language: node_js
+node_js: stable
+cache:
+  apt: true
+  directories:
+  - node_modules
+before_install:
+- openssl aes-256-cbc -K $encrypted_2d8a086f239f_key -iv $encrypted_2d8a086f239f_iv
+  -in id_rsa.enc -out id_rsa -d
+- npm install hexo-cli -g
+install:
+- npm install
+- npm install hexo-deployer-git --save
+script:
+- hexo clean
+- hexo g
+after_script:
+- git clone ${GH_REF} hexo-public
+- cp -rf public/* hexo-public/
+- cd hexo-public
+- git config user.name "shenbo"
+- git config user.email "shenbo@hotmail.com"
+- git add .
+- git commit -am "Travis CI Auto Builder..."
+- git push origin master
+branches:
+  only:
+  - master
+env:
+  global:
+  - GH_REF: https://shenbo:${github_token}@github.com/shenbo/shenbo.github.io.git
+cache:
+  directories:
+    - node_modules
